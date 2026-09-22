@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#000000">
+  <meta name="robots" content="noindex">
+  <meta name="description" content="You found the hidden stage. Your prize is nothing.">
+  <title>oh.</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #000000;
+      --surface:    rgba(255, 255, 255, 0.04);
+      --surface-hi: rgba(255, 255, 255, 0.065);
+      --border:     rgba(255, 255, 255, 0.09);
+      --border-hi:  rgba(255, 255, 255, 0.16);
+      --text-1:     #f5f5f7;
+      --text-2:     #a1a1a6;
+      --text-3:     #6e6e73;
+      --green:      #32d74b;
+      --ease:       cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    html {
+      background: var(--bg);
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(2rem, 5vw, 3.5rem) clamp(1.25rem, 4vw, 2rem);
+      padding-top: calc(clamp(2rem, 5vw, 3.5rem) + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(clamp(2rem, 5vw, 3.5rem) + env(safe-area-inset-bottom, 0px));
+      color: var(--text-1);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                   "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+    }
+
+    /* ambient glow — fixed so it never scrolls or overflows */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(70ch 55ch at 50% -15%, rgba(255, 255, 255, 0.055), transparent 70%),
+        radial-gradient(55ch 45ch at 50% 115%, rgba(50, 215, 75, 0.045), transparent 70%);
+    }
+
+    ::selection { background: rgba(255, 255, 255, 0.18); color: #fff; }
+
+    /* ---- layout: auto margins centre safely, even when content overflows ---- */
+    .stage {
+      margin: auto;
+      width: 100%;
+      max-width: 40rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ---- entrance animation (uses `translate`, leaving `transform` free) ---- */
+    @keyframes rise {
+      from { opacity: 0; translate: 0 14px; }
+      to   { opacity: 1; translate: 0 0; }
+    }
+
+    .reveal {
+      opacity: 0;
+      translate: 0 14px;
+      animation: rise 0.85s var(--ease) var(--d, 0s) both;
+    }
+
+    /* ---- badge ---- */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 15px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      color: var(--text-2);
+      margin-bottom: clamp(1.75rem, 5vw, 2.5rem);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 7px var(--green);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.3; }
+    }
+
+    /* ---- headline ---- */
+    h1 {
+      font-size: clamp(2.25rem, 9vw, 4.75rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      text-align: center;
+      text-wrap: balance;
+    }
+
+    h1 span { color: var(--text-2); }
+
+    /* ---- divider ---- */
+    .divider {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, transparent, var(--border-hi), transparent);
+      margin: clamp(1.75rem, 5vw, 2.5rem) 0;
+    }
+
+    /* ---- body copy ---- */
+    .copy {
+      max-width: 34ch;
+      text-align: center;
+    }
+
+    .copy p {
+      font-size: clamp(1rem, 2.5vw, 1.15rem);
+      line-height: 1.6;
+      letter-spacing: 0.01em;
+      color: var(--text-2);
+      text-wrap: pretty;
+    }
+
+    .copy p + p { margin-top: 1rem; }
+
+    .copy .highlight {
+      color: var(--text-1);
+      font-weight: 500;
+    }
+
+    /* ---- prize card ---- */
+    .card {
+      margin-top: clamp(2.25rem, 6vw, 3rem);
+      width: 100%;
+      max-width: 21rem;
+      padding: 2rem 2.25rem;
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: transform 0.4s var(--ease),
+                  border-color 0.4s var(--ease),
+                  background-color 0.4s var(--ease);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .card:hover {
+        transform: translateY(-3px);
+        background: var(--surface-hi);
+        border-color: var(--border-hi);
+      }
+    }
+
+    .card:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.4);
+      outline-offset: 4px;
+    }
+
+    .card .label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 0.75rem;
+    }
+
+    /* spoiler blur */
+    .card .spoiler {
+      filter: blur(8px);
+      opacity: 0.35;
+      user-select: none;
+      pointer-events: none;
+      transition: filter 0.6s var(--ease),
+                  opacity 0.6s var(--ease);
+    }
+
+    .card.revealed .spoiler {
+      filter: blur(0);
+      opacity: 1;
+      user-select: auto;
+    }
+
+    .card .prize {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-1);
+      margin-bottom: 0.4rem;
+    }
+
+    .card .sub {
+      font-size: 0.85rem;
+      letter-spacing: 0.01em;
+      color: var(--text-3);
+    }
+
+    /* ---- signature ---- */
+    .sig {
+      margin-top: clamp(2.5rem, 7vw, 3.5rem);
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      color: var(--text-3);
+      text-align: center;
+    }
+
+    /* ---- accessibility: kill motion *and* its delays ---- */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .dot { animation: none !important; opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="stage">
+
+    <div class="badge reveal" style="--d: 0.10s">
+      <span class="dot" aria-hidden="true"></span>
+      hidden stage
+    </div>
+
+    <h1 class="reveal" style="--d: 0.22s">
+      You actually<br><span>found this.</span>
+    </h1>
+
+    <div class="divider reveal" style="--d: 0.34s" aria-hidden="true"></div>
+
+    <div class="copy">
+      <p class="reveal" style="--d: 0.42s">
+        Most people read the final page, laugh, and close the tab.
+      </p>
+      <p class="reveal" style="--d: 0.50s">
+        You decoded the P.S. lines. You found the cipher.
+        You came <span class="highlight">here.</span>
+      </p>
+      <p class="reveal" style="--d: 0.58s">
+        That is genuinely impressive. I did not expect anyone to make it this far.
+      </p>
+      <p class="reveal" style="--d: 0.66s">
+        So what do you win for the extra effort?
+      </p>
+    </div>
+
+    <div
+      class="card reveal"
+      style="--d: 0.76s"
+      role="button"
+      tabindex="0"
+      aria-expanded="false"
+    >
+      <p class="label">Your prize</p>
+      <div class="spoiler" aria-hidden="true">
+        <p class="prize">Still nothing.</p>
+        <p class="sub">Absolutely nothing. Not even a sticker.</p>
+      </div>
+    </div>
+
+    <p class="sig reveal" style="--d: 0.90s">
+      — ItzRedFox &nbsp;·&nbsp; go outside.
+    </p>
+
+  </main>
+
+  <script>
+    const card = document.querySelector('.card');
+    const spoiler = card.querySelector('.spoiler');
+
+    function revealPrize() {
+      if (card.classList.contains('revealed')) return;
+
+      card.classList.add('revealed');
+      card.setAttribute('aria-expanded', 'true');
+      spoiler.setAttribute('aria-hidden', 'false');
+    }
+
+    card.addEventListener('click', revealPrize);
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        revealPrize();
+      }
+    });
+  </script>
+
+</body>
+</html>
